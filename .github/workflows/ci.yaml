@@ -1,0 +1,33 @@
+on:
+  # Trigger analysis when pushing in master or pull requests, and when creating
+  # a pull request. 
+  push:
+    branches:
+      - master
+  pull_request:
+      types: [opened, synchronize, reopened]
+env:
+  image_build: "cp-icenter-images"
+  image_name: ""
+  REGISTERY: "ghcr.io"
+  IMG_NAME: "cp-icenter-images"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checking out
+      uses: actions/checkout@v3
+
+    - name: Docker login
+      uses: docker/login-action@v2
+      with:
+        registery: ${{ env.REGISTERY }}
+        username: ${{github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Docker Build
+      run: docker build .  --file Dockerfile  --tag  ghcr.io/${{ env.IMG_NAME }}/customer-portal-images:V1.0
+    - name : Docker push
+      run: docker push ghcr.io/${{ env.IMG_NAME }}/customer-portal-images:V1.0
+    
